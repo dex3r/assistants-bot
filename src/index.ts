@@ -1,14 +1,24 @@
-import { createServer } from "node:http";
+import * as Discord from "discord.js";
+import * as dotenv from "dotenv";
 
-const hostname = '127.0.0.1';
-const port = 3000;
+dotenv.config();
 
-const server = createServer((req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/plain');
-    res.end('Hello World');
-});
+let intents : Discord.BitFieldResolvable<Discord.GatewayIntentsString, number> = [
+    Discord.GatewayIntentBits.MessageContent,
+    Discord.GatewayIntentBits.GuildMessages,
+]
 
-server.listen(port, hostname, () => {
-    console.log(`Server running at http://${hostname}:${port}/`);
-});
+if(process.env.ALLOW_DMS === "true"){
+    intents = intents.concat(Discord.GatewayIntentBits.DirectMessages)
+}
+
+const discordClientOptions : Discord.ClientOptions = {intents: intents}
+const discordClient = new Discord.Client(discordClientOptions);
+
+discordClient.once(Discord.Events.ClientReady, readyClient => {
+    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+})
+
+console.log("Logging in to Discord...")
+discordClient.login(process.env.DISCORD_BOT_TOKEN)
+    .then(() => console.log("Discord LogIn Finished"))
