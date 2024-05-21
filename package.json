@@ -19,5 +19,8 @@
     "bot"
   ],
   "author": "dex3r",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
 }
