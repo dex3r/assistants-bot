@@ -1,5 +1,7 @@
 import * as Discord from "discord.js";
 import * as dotenv from "dotenv";
+import { handleMessage } from "./MessagesHandler";
+import * as AppConfig from "./AppConfig";
 
 dotenv.config();
 
@@ -19,6 +21,10 @@ discordClient.once(Discord.Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 })
 
+discordClient.on('messageCreate', async (message: Discord.Message<boolean>) => {
+    await handleMessage(message);
+})
+
 console.log("Logging in to Discord...")
-discordClient.login(process.env.DISCORD_BOT_TOKEN)
+discordClient.login(AppConfig.getDiscordToken())
     .then(() => console.log("Discord LogIn Finished"))
