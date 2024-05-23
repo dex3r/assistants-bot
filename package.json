@@ -7,7 +7,7 @@
     "url": "https://github.com/dex3r/assistants-bot.git"
   },
   "scripts": {
-    "start": "tsc && eslint . && node dist/index.js",
+    "start": "eslint . && tsc && node dist/index.js",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
