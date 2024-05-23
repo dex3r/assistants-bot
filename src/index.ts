@@ -23,7 +23,7 @@ else {
 }
 
 const discordClientOptions : Discord.ClientOptions = {intents: intents, partials: partials}
-const discordClient = new Discord.Client(discordClientOptions);
+export const discordClient = new Discord.Client(discordClientOptions);
 
 discordClient.once(Discord.Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`);

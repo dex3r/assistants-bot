@@ -47,15 +47,20 @@ async function handleDm(message: Message<boolean>, channel: DMChannel) {
         return
     }
     
+    await channel.sendTyping();
+    
     await finishMessageFetch(message);
     
-    const messagesHistory = await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() });
+    let messagesHistory = await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() });
+    messagesHistory = messagesHistory.reverse();
 
-    const replyMessage : string = await AssistantsHandler.getBotReply(messagesHistory.map(msg => msg));
-
-    logMessageAndReply(message, replyMessage);
+    const replyMessages : string[] = await AssistantsHandler.getBotReply(messagesHistory.map(msg => msg));
     
-    await channel.send(replyMessage);
+    for(const replyMessage of replyMessages) {
+        logMessageAndReply(message, replyMessage);
+
+        await channel.send(replyMessage);
+    }
 }
 
 async function handleThreadMessage(message: Message<boolean>, channel: ThreadChannel) {
