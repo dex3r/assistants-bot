@@ -106,7 +106,9 @@ async function generateAndSendReplayInNewThread(message: Message<boolean>, chann
     
     await targetChannel.sendTyping();
 
-    const replyMessages : string[] = await AssistantsHandler.getBotReply([message]);
+    const messagesHistory : Message<boolean>[] = await getRepliesHistory(message);
+    
+    const replyMessages : string[] = await AssistantsHandler.getBotReply(messagesHistory);
 
     for(const replyMessage of replyMessages) {
         logMessageAndReply(message, replyMessage);
