@@ -1,7 +1,5 @@
 import {
     AnyThreadChannel,
-    BaseChannel,
-    BaseGuildTextChannel,
     DMChannel,
     Message,
     MessageType,
