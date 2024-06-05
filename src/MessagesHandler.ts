@@ -75,15 +75,47 @@ async function handleDm(message: Message<boolean>, channel: DMChannel) {
 
 async function handleThreadMessage(message: Message<boolean>, channel: ThreadChannel) {
     await finishMessageFetch(message);
+    
+    const replyToMention = AppConfig.getAnswerThreadMentions() && getAmIMentioned(message);
+    const replyToMyMessage = AppConfig.getAnswerToReplies() && await isReplyToMyMessage(message);
+    
+    if(!replyToMention && !replyToMyMessage) {
+        return;
+    }
+
+    await channel.sendTyping();
+    
+    const threadMessages = await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() });
+    threadMessages.reverse();
+
+    const replyMessages : string[] = await AssistantsHandler.getBotReply(threadMessages.map(msg => msg));
+
+    for(const replyMessage of replyMessages) {
+        logMessageAndReply(message, replyMessage);
+
+        await channel.send(replyMessage);
+    }
+}
+
+async function isReplyToMyMessage(message: Message<boolean>) {
+    while(message != null && message.type === MessageType.Reply) {
+        const reference: Message<boolean> = await message.fetchReference();
+        
+        if(reference.author.id === discordClient.user.id) {
+            return true;
+        }
+        
+        message = reference;
+    }
 }
 
 async function handleChannelMessage(message: Message<boolean>, channel: TextChannel) {
     await finishMessageFetch(message);
+
+    const replyToMention = AppConfig.getAnswerChannelMentions() && getAmIMentioned(message);
+    const replyToMyMessage = AppConfig.getAnswerToReplies() && await isReplyToMyMessage(message);
     
-    //const isImmediateReplyToMyMessage : boolean = getIsImmediateReplyToMyMessage(message);
-    //const isReplyToMyMessage : boolean = getIsReplyToMyMessage(message);
-    
-    if(AppConfig.getAnswerChannelMentions() && getAmIMentioned(message)) {
+    if(replyToMention || replyToMyMessage) {
         
         if(AppConfig.getAnswerInThread()){
             await generateAndSendReplayInNewThread(message, channel);
@@ -156,7 +188,7 @@ function getAmIMentioned(message: Message<boolean>) {
 
 async function tryToCreateNewThread(message: Message<boolean>, channel: TextChannel) : Promise<AnyThreadChannel<boolean> | null> {
     try {
-        const newThread: AnyThreadChannel<boolean> = await message.startThread({name: `${discordClient.user.displayName} answer thread to ${message.content}`});
+        const newThread: AnyThreadChannel<boolean> = await message.startThread({name: `answer to "${message.cleanContent}"`});
         if (newThread) {
             return newThread
         } else {

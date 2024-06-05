@@ -15,7 +15,7 @@ export async function getBotReply(messages: Message<boolean>[]) : Promise<string
     const messagesForAssistant : Array<ThreadCreateParams.Message> = messages.map(msg => {
         return {
             role: msg.author.id === discordClient.user.id ? "assistant" : "user",
-            content: `<${msg.author.displayName}> ${msg.content}`
+            content: `<${msg.author.displayName}> ${msg.cleanContent}`
         }
     });
 

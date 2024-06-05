@@ -33,3 +33,11 @@ export function getAnswerChannelMentions() : boolean {
 export function getAnswerInThread() : boolean {
     return process.env.REPLY_IN_THREAD.toLowerCase() === "true"
 }
+
+export function getAnswerToReplies() : boolean {
+    return process.env.ANSWER_TO_REPLIES.toLowerCase() === "true"
+}
+
+export function getAnswerThreadMentions() : boolean {
+    return process.env.ANSWER_THREADS_MENTIONS.toLowerCase() === "true"
+}
