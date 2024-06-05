@@ -11,17 +11,25 @@ export function getAssistantId() : string {
 }
 
 export function getAllowDms() : boolean {
-    return process.env.ANSWER_DM === "true"
+    return process.env.ANSWER_DM.toLowerCase() === "true"
 }
 
 export function getLogAllMessages() : boolean {
-    return process.env.LOG_ALL_MESSAGES === "true"
+    return process.env.LOG_ALL_MESSAGES.toLowerCase() === "true"
 }
 
 export function getLogAssistantsRequests() : boolean {
-    return process.env.LOG_ASSISTANTS_REQUESTS === "true"
+    return process.env.LOG_ASSISTANTS_REQUESTS.toLowerCase() === "true"
 }
 
 export function getHistoryLimit() : number {
     return parseInt(process.env.HISTORY_LIMIT || "15")
+}
+
+export function getAnswerChannelMentions() : boolean {
+    return process.env.ANSWER_CHANNEL_MENTIONS.toLowerCase() === "true"
+}
+
+export function getAnswerInThread() : boolean {
+    return process.env.REPLY_IN_THREAD.toLowerCase() === "true"
 }
