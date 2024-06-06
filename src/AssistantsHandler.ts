@@ -41,8 +41,8 @@ export async function getBotReply(messages: Message<boolean>[]) : Promise<string
                     console.log(`Received OpenAI response: ${content.text.value}`);
                 }
                 
-                const clearResponse = cleanupResponse(content.text.value);
-                responses.push(clearResponse);
+                const clearResponses = cleanupResponse(content.text.value);
+                clearResponses.forEach(response => responses.push(response));
                 
             } else {
                 console.error(`Received unsupported message type from OpenAI: ${content.type}`);
@@ -53,7 +53,7 @@ export async function getBotReply(messages: Message<boolean>[]) : Promise<string
     return responses;
 }
 
-function cleanupResponse(response: string) : string {
+function cleanupResponse(response: string) : string[] {
     let clearResponse = response.trim();
     
     if(clearResponse.startsWith("<")){
@@ -61,5 +61,18 @@ function cleanupResponse(response: string) : string {
         clearResponse = clearResponse.substring(clearResponse.indexOf(">") + 1);
     }
     
-    return clearResponse;
+    // Split the response into chunks of 2000 characters
+    const maxChar = 2000;
+    const messages = [];
+    while (clearResponse.length > 0) {
+        if (clearResponse.length > maxChar) {
+            messages.push(clearResponse.substring(0, maxChar));
+            clearResponse = clearResponse.substring(maxChar);
+        } else {
+            messages.push(clearResponse);
+            break;
+        }
+    }
+    
+    return messages;
 }
