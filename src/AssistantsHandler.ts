@@ -61,13 +61,16 @@ function cleanupResponse(response: string) : string[] {
         clearResponse = clearResponse.substring(clearResponse.indexOf(">") + 1);
     }
     
-    // Split the response into chunks of 2000 characters
-    const maxChar = 2000;
+    // Split the response into chunks of 2000 characters, ensuring not to split lines
+    const maxChar = 2000 - 3; // Adjust for the length of ellipsis
     const messages = [];
     while (clearResponse.length > 0) {
         if (clearResponse.length > maxChar) {
-            messages.push(clearResponse.substring(0, maxChar));
-            clearResponse = clearResponse.substring(maxChar);
+            let lastNewLineIndex = clearResponse.lastIndexOf('\n', maxChar);
+            if (lastNewLineIndex === -1) lastNewLineIndex = maxChar; // In case there's no newline, fall back to maxChar
+            
+            messages.push(clearResponse.substring(0, lastNewLineIndex) + "\n…");
+            clearResponse = "…\n" + clearResponse.substring(lastNewLineIndex).trim();
         } else {
             messages.push(clearResponse);
             break;
