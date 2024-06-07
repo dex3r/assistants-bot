@@ -119,11 +119,21 @@ async function handleChannelMessage(message: Message<boolean>, channel: TextChan
             await generateAndSendReplayInNewThread(message, channel);
         } else {
             await channel.sendTyping();
-            await generateAndSendReply(message, await getRepliesHistory(message));
+            // Fetch the last 3 messages including the current one
+            const messagesHistory = await fetchRecentMessages(message, 3); // Adjust the number as needed
+            await generateAndSendReply(message, messagesHistory);
         }
         
         return;
     }
+}
+
+// Helper function to fetch the last n messages including the current one
+async function fetchRecentMessages(currentMessage: Message<boolean>, limit: number): Promise<Message<boolean>[]> {
+    const messages = await currentMessage.channel.messages.fetch({ limit: limit, before: currentMessage.id });
+    const messagesArray = Array.from(messages.values());
+    messagesArray.unshift(currentMessage); // Include the current message at the start of the array
+    return messagesArray.reverse(); // Reverse to maintain chronological order
 }
 
 async function generateAndSendReplayInNewThread(message: Message<boolean>, channel: TextChannel) {
