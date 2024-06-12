@@ -13,11 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v4
     - name: Create placeholder .env
       uses: canastro/copy-action@0.0.2
       with:
         source: .env.example
         target: .env
-    - uses: actions/checkout@v4
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag assistants-bot:$(date +%s)
