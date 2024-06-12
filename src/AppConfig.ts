@@ -41,3 +41,11 @@ export function getAnswerToReplies() : boolean {
 export function getAnswerThreadMentions() : boolean {
     return process.env.ANSWER_THREADS_MENTIONS.toLowerCase() === "true"
 }
+
+export function getFetchUnrelatedChannelMessages() : boolean {
+    return process.env.FETCH_UNRELATED_CHANNEL_MESSAGES.toLowerCase() === "true"
+}
+
+export function getUnrelatedChannelMessagesHistoryLimit() : number {
+    return parseInt(process.env.FETCH_UNRELATED_CHANNEL_MESSAGES_LIMIT || "5")
+}

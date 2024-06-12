@@ -9,6 +9,7 @@ import {
 import * as AppConfig from "./AppConfig";
 import * as AssistantsHandler from "./AssistantsHandler";
 import {discordClient} from "./index";
+import {getFetchUnrelatedChannelMessages} from "./AppConfig";
 
 export async function handleMessage(message: Message<boolean>) : Promise<void> {
     try {
@@ -119,8 +120,18 @@ async function handleChannelMessage(message: Message<boolean>, channel: TextChan
             await generateAndSendReplayInNewThread(message, channel);
         } else {
             await channel.sendTyping();
-            // Fetch the last 3 messages including the current one
-            const messagesHistory = await fetchRecentMessages(message, 3); // Adjust the number as needed
+            
+            let messagesHistory: Message<boolean>[] = await getRepliesHistory(message);
+            
+            if(AppConfig.getFetchUnrelatedChannelMessages()) {
+                const limit = AppConfig.getUnrelatedChannelMessagesHistoryLimit();
+                const naturalHistory: Message<boolean>[] = await fetchRecentMessages(message, limit);
+
+                // Since bot should answer to the referenced message (as human would)
+                // make sure replies flow are at the bottom to preserver context
+                messagesHistory = naturalHistory.concat(messagesHistory); 
+            }
+            
             await generateAndSendReply(message, messagesHistory);
         }
         
@@ -132,7 +143,6 @@ async function handleChannelMessage(message: Message<boolean>, channel: TextChan
 async function fetchRecentMessages(currentMessage: Message<boolean>, limit: number): Promise<Message<boolean>[]> {
     const messages = await currentMessage.channel.messages.fetch({ limit: limit, before: currentMessage.id });
     const messagesArray = Array.from(messages.values());
-    messagesArray.unshift(currentMessage); // Include the current message at the start of the array
     return messagesArray.reverse(); // Reverse to maintain chronological order
 }
 
