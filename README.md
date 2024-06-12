@@ -8,10 +8,14 @@ Rename it to `.env`, comment out the commented variables and fill them in.
 For production, I recommend storing the secrets in environment variables instead.
 
 # Running the bot
-### Running from source
+### Running locally
 Execute the following command in the root directory of the project:
 ```bash
 npm run start
 ```
 
 ### Running in Docker
+Execute the following commands in the root directory of the project:
+```bash
+docker build -t assistant-bot .
+```
