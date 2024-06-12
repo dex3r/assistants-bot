@@ -10,7 +10,7 @@ import * as AppConfig from "./AppConfig";
 import * as AssistantsHandler from "./AssistantsHandler";
 import {discordClient} from "./index";
 import {getFetchUnrelatedChannelMessages} from "./AppConfig";
-
+sf
 export async function handleMessage(message: Message<boolean>) : Promise<void> {
     try {
         if (message.author.bot || !message.content) {
