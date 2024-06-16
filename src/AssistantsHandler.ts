@@ -4,6 +4,7 @@ import {OpenAI} from "openai";
 import {ThreadCreateParams} from "openai/src/resources/beta/threads/threads";
 import * as dotenv from "dotenv";
 import {discordClient} from "./index";
+import {Transcription} from "openai/resources/audio";
 
 dotenv.config();
 
@@ -78,4 +79,19 @@ function cleanupResponse(response: string) : string[] {
     }
     
     return messages;
+}
+
+
+export async function transcribeVoiceMessage(voiceUrl: string): Promise<string> {
+    const voiceBlob: Blob = await fetch(voiceUrl).then(response => response.blob());
+    const file = await OpenAI.toFile(voiceBlob, "voiceMessage.ogg");
+    
+    const transcription: Transcription = await openai.audio.transcriptions.create({  
+        file: file,
+        temperature: 0,
+        response_format: "text",
+        model: "whisper-1"
+    });
+    
+    return (<string><unknown>transcription)
 }

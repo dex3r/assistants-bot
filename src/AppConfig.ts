@@ -49,3 +49,7 @@ export function getFetchUnrelatedChannelMessages() : boolean {
 export function getUnrelatedChannelMessagesHistoryLimit() : number {
     return parseInt(process.env.FETCH_UNRELATED_CHANNEL_MESSAGES_LIMIT || "5")
 }
+
+export function getTranscribeVoiceMessages() {
+    return process.env.TRANSCRIBE_VOICE_MESSAGES.toLowerCase() === "true"
+}

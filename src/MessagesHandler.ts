@@ -1,20 +1,27 @@
-import {
-    AnyThreadChannel,
-    DMChannel,
-    Message,
-    MessageType,
-    TextChannel,
-    ThreadChannel
-} from "discord.js";
+import {AnyThreadChannel, DMChannel, Message, MessageType, TextChannel, ThreadChannel} from "discord.js";
 import * as AppConfig from "./AppConfig";
 import * as AssistantsHandler from "./AssistantsHandler";
 import {discordClient} from "./index";
-import {getFetchUnrelatedChannelMessages} from "./AppConfig";
 
 export async function handleMessage(message: Message<boolean>) : Promise<void> {
     try {
         if (message.author.bot || !message.content) {
-            return;
+            if(AppConfig.getTranscribeVoiceMessages() 
+                && message.attachments.size == 1 
+                && message.attachments.first().name === "voice-message.ogg") {
+                
+                await finishMessageFetch(message);
+                
+                const attachment = message.attachments.first();
+                const voiceUrl = attachment.url;
+                const transcription = await AssistantsHandler.transcribeVoiceMessage(voiceUrl);
+                
+                message = structuredClone(message);
+                message.content = transcription;
+            }
+            else {
+                return;
+            }
         }
 
         if (message.channel instanceof DMChannel) {
@@ -40,6 +47,10 @@ export async function handleMessage(message: Message<boolean>) : Promise<void> {
     }
 }
 
+function isVoiceMessage(message: Message){
+    return message.attachments.size == 1 && message.attachments.first().name === "voice-message.ogg";
+}
+
 async function finishMessageFetch(message: Message<boolean>){
     if(message.partial){
         try {
@@ -60,12 +71,34 @@ async function handleDm(message: Message<boolean>, channel: DMChannel) {
     
     await finishMessageFetch(message);
     
-    let messagesHistory = await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() });
-    messagesHistory = messagesHistory.reverse();
+    const messagesHistory : Message[] = (await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() }))
+        .map(msg => msg);
+    
+    messagesHistory.reverse();
+    
+    // delete message at index 0 from messagesHistory
+    messagesHistory.shift();
+    
+    // Replace history fetched message with the current message, since it could have been preprocessed by this app before
+    messagesHistory.push(message);
 
     const replyMessages : string[] = await AssistantsHandler.getBotReply(messagesHistory.map(msg => msg));
     
-    for(const replyMessage of replyMessages) {
+    let isFirst : boolean = true;
+    for(let replyMessage of replyMessages) {
+         
+        if(isFirst) {
+            isFirst = false;
+            
+            if(isVoiceMessage(message)) {
+                replyMessage = `Transcribed voice message by @${message.author.id}:\n
+                *${message.content}*\n
+                \n
+                Response:\n
+                ${replyMessage}`;
+            }
+        }
+        
         logMessageAndReply(message, replyMessage);
         
         await channel.send(replyMessage);
