@@ -84,7 +84,8 @@ async function handleThreadMessage(message: Message<boolean>, channel: ThreadCha
 
     await channel.sendTyping();
     
-    const threadMessages = await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() });
+    const threadMessages : Message[] = (await channel.messages.fetch({ limit: AppConfig.getHistoryLimit() })).map(msg => msg);
+    threadMessages.push(await channel.fetchStarterMessage());
     threadMessages.reverse();
 
     const replyMessages : string[] = await AssistantsHandler.getBotReply(threadMessages.map(msg => msg));
